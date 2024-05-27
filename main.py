@@ -61,18 +61,20 @@ def cauchy(a: float, h: float, y_0: float, n: int, func: Callable[[float, float]
 
 def get_x_axis(a: float, h: float, n: int) -> list[float]:
     x_axis = [a]
-    [x_axis.append(a + h * i) for i in range(n)]
+    [x_axis.append(a + h * i) for i in range(1, n + 1)]
 
     return x_axis
 
 
-def get_result(a: float, y_0: float, methods: list[Method], exact: Callable[[float], float]):
+def get_result(a: float, y_0: float, methods: list[Method], initial: Callable[[float, float], float],
+               exact: Callable[[float], float]):
     figure, axis = plt.subplots(2, 2)
     plt.subplots_adjust(hspace=0.4, wspace=0.3)
+
     for idx, pos in enumerate([[0, 0], [0, 1], [1, 0]]):
-        first_y = methods[idx].func(a, 0.1, y_0, 10, lambda x, y: 50 * y * (x - 0.6) * (x - 0.85))
-        second_y = methods[idx].func(a, 0.05, y_0, 20, lambda x, y: 50 * y * (x - 0.6) * (x - 0.85))
-        third_y = methods[idx].func(a, 0.025, y_0, 40, lambda x, y: 50 * y * (x - 0.6) * (x - 0.85))
+        first_y = methods[idx].func(a, 0.1, y_0, 10, initial)
+        second_y = methods[idx].func(a, 0.05, y_0, 20, initial)
+        third_y = methods[idx].func(a, 0.025, y_0, 40, initial)
 
         first_x = get_x_axis(a, 0.1, 10)
         second_x = get_x_axis(a, 0.05, 20)
@@ -97,5 +99,6 @@ def get_result(a: float, y_0: float, methods: list[Method], exact: Callable[[flo
 get_result(0, 0.1, [
     Method('Коши', cauchy),
     Method('Тейлор явный 3 порядка', explicit_3rd_order_taylor),
-    Method('Адамса двушаговый неявный', implicit_two_step_adams)
-], lambda x: 1 / 10 * math.exp(1 / 12 * x * (200 * x * x - 435 * x + 306)))
+    Method('Адамса двухшаговый неявный', implicit_two_step_adams)
+], lambda x, y: 50 * y * (x - 0.6) * (x - 0.85),
+           lambda x: 1 / 10 * math.exp(1 / 12 * x * (200 * x * x - 435 * x + 306)))
